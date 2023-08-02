@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+ <a href="accueil.php">ACCUEIL</a>
+ <!DOCTYPE html>
 <html>
 <head>
     <title>Profil Utilisateur</title>

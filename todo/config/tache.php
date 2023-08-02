@@ -58,19 +58,30 @@ class Task {
     }
     
 
-    public function updateTaskName($taskId, $taskName) {
+    public function updateTaskName($taskId, $taskName, $newstatus = "") {
         try {
-            // Mettre à jour le statut de la tâche dans la base de données
-            $stmt = $this->db->prepare("UPDATE taches SET task_name = :task_name WHERE id = :task_id");
-            $stmt->bindParam(':task_name', $taskName);
-            $stmt->bindParam(':task_id', $taskId);
+            if (!empty($newstatus)) {
+
+                  // Mettre à jour le statut de la tache de l'utilisateur dans la base de données
+                  $stmt = $this->db->prepare("UPDATE taches SET task_name = :taskname,  status = :status WHERE id = :id");
+                  $stmt->bindParam(':status', $newstatus);
+             
+        } else {
+            // Si aucune tache n'a été fourni, mettre à jour uniquement le nom de la tache 
+            $stmt = $this->db->prepare("UPDATE taches SET task_name = :taskname WHERE id = :id");
+        }            
+            $stmt->bindParam(':taskname', $taskName);
+            $stmt->bindParam(':id', $taskId);
             $stmt->execute();
 
             return true;
         } catch (PDOException $e) {
-            die('Erreur lors de la mise à jour du  de la tâche : ' . $e->getMessage());
+            die('Erreur lors de la mise à jour de la tâche : ' . $e->getMessage());
         }
     }
+
+   
+    
 
     public function getLastTask($userId) {
         try {

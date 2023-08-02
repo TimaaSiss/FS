@@ -6,7 +6,7 @@ use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-// Récupérez les données du client (exemple : en utilisant $_POST)
+// Récupérez les données du client (exemple : en utilisant $_GET)
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Vérifier si le JWT est présent dans l'en-tête Authorization
     $headers = apache_request_headers();
@@ -15,36 +15,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
         $decoded = JWT::decode($jwt, new Key(SECRET_KEY, 'HS256'));
         $userRoles = $decoded->roles;
+        $tasks = $taskManager->getAllTasks();
 
+        
+        // Vérifier si l'utilisateur a le rôle "admin"
         if ($userRoles=='admin') {
             // L'utilisateur est un administrateur, on peut continuer
 
             // Récupérer les données du formulaire
-            $userId = $_GET['id'];
+           // $userId = $_GET['id'];
 
             // Valider l'ID de l'utilisateur
-            if (empty($userId)) {
-                echo json_encode(['message' => 'Veuillez fournir l\'identifiant de l\'utilisateur à supprimer.']);
-                exit; // Arrêter l'exécution du script
-            } else {
-                // Appeler la méthode getTacheById pour récupérer la tâche spécifique
-                $user = $userManager->getUserbyId($userId);
+          //  if (empty($tasks)) {
+             //   echo json_encode(['message' => 'Veuillez fournir l\'identifiant de la tache à séléctionner.']);
+             //   exit; // Arrêter l'exécution du script
+          //  } else {
+                // Appeler la méthode getTache pour récupérer la tâche spécifique
+               // $tache = $taskManager->getAllTasks();
 
                 // Renvoyer une réponse JSON appropriée
-                if ($user) {
-                    echo json_encode($user);
-                } else {
+                if ($tasks) {
+                    echo json_encode($tasks);
+               // } //else {
                     echo json_encode(['message' => 'Utilisateur non trouvé.']);
                 }
-            }
+          //  }
         } else {
             echo json_encode(['message' => 'Accès non autorisé.']);
         }
-    }catch(ExpiredException $e){
+        if ($tasks) {
+            echo json_encode($tasks);
+        } else {
+            echo json_encode(['message' => 'Aucune tâche trouvée.']);
+        }
+    } catch (ExpiredException $e) {
         // Le JWT est expiré
-        echo json_encode(['message' => 'Accès non autorisé. Token expired.']);
-    } catch (Exception $e) {
-        // Le JWT n'est pas valide
+        echo json_encode(['message' => 'Accès non autorisé. Token Expired']);
+    }catch (Exception $e) {
+        // Le JWT n'est pas valide ou est expiré
         echo json_encode(['message' => 'Accès non autorisé.']);
     }
 }
+?>

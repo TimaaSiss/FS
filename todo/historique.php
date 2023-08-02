@@ -48,6 +48,8 @@ echo $t;
             <li><?php echo $task['task_name']; ?> (Statut : <?php echo $task['status']; ?>)</li>
         <?php endforeach; ?>
     </ul>
+
+     <a href="profil.php">Retour au Profil</a>
    
 </body>
 </html>

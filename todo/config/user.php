@@ -59,7 +59,7 @@ class User {
      public function getUserbyId($user) {
         try {
             // Récupérer les informations de l'utilisateur depuis la base de données
-            $stmt = $this->db->prepare("SELECT * FROM user WHERE id = :username");
+            $stmt = $this->db->prepare("SELECT `id`,`username`,`mail`,`Roles`,`dateinscription` FROM user WHERE id = :username");
             $stmt->bindParam(':username', $user);
             $stmt->execute();
             $user = $stmt->fetch();

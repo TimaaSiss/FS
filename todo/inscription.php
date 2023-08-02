@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Inscription</title>
     <style>
     body {
-        background-image: url("doit.jpg");
+        background-image: url("./assets/doit.jpg");
         background-size: cover;
         background-position: center;
     }

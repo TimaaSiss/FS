@@ -35,7 +35,7 @@ if (isset($_SESSION['id'])) {
     <style>
       body {
             font-family: Arial, sans-serif;
-            background-image: url("nice.jpg");
+            background-image: url("./assets/nice.jpg");
             background-size: cover;
             background-position: center;
             margin: 0;

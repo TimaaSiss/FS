@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Temps d'expiration du JWT (facultatif)
         $issuat = time();
-        $expirationTime = $issuat + 10; // Expire dans 1 heure
+        $expirationTime = $issuat + 3600; // Expire dans 1 heure
 
         // Créez le JWT
         $payload = array(
@@ -55,3 +55,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
+
+
+
+
+
+
+
+
+
+
