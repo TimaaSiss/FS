@@ -1,24 +1,30 @@
 // userSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 
+const initialState = {
+  username: "",
+  email: "",
+  password: "",
+  jwt:""
+  // Autres champs d'utilisateur que vous pourriez avoir
+};
+
 const userSlice = createSlice({
   name: "user",
-  initialState: {
-    username: "",
-    email: "",
-    // Autres champs d'utilisateur que vous pourriez avoir
-  },
+  initialState,
   reducers: {
     updateUser: (state, action) => {
-      const { username, email } = action.payload;
+      const { username, email, jwt } = action.payload;
       state.username = username;
       state.email = email;
+      state.jwt= jwt;
     },
     logoutUser: (state) => {
       // Réinitialisez les valeurs utilisateur à l'état initial lors de la déconnexion
-      state.username = "";
-      state.email = "";
+      return initialState;
+    
     },
+
   },
 });
 

@@ -26,9 +26,9 @@ const Profile = ({ navigation }) => {
   
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('ChangePassword')} // Naviguer vers la page de changement de mot de passe
+          onPress={() => navigation.navigate('updateUser')} // Naviguer vers la page de changement de mot de passe
         >
-          <Text style={styles.buttonText}>Modifier le mot de passe</Text>
+          <Text style={styles.buttonText}>Modifier les informations de l'utilisateur</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -40,7 +40,7 @@ const Profile = ({ navigation }) => {
   
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('TaskHistory')} // Naviguer vers l'historique des tâches
+          onPress={() => navigation.navigate('Historique')} // Naviguer vers l'historique des tâches
         >
           <Text style={styles.buttonText}>Historique des tâches</Text>
         </TouchableOpacity>

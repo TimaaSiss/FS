@@ -3,6 +3,7 @@ import { Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, ScrollView
 import { useDispatch } from 'react-redux';
 import { updateUser } from '../userSlice';
 import layouts from '../../constantes/layouts';
+import api from '../../constantes';
 
 const Inscription = (props) => {
   const [email, setEmail] = useState('');
@@ -11,12 +12,34 @@ const Inscription = (props) => {
 
   const dispatch = useDispatch();
 
-  const handleSignup = () => {
-    // Dispatch de l'action pour mettre à jour les informations de l'utilisateur
-    dispatch(updateUser({ username: username, email: email }));
+  const handleSignup = async () => {
+    if (!email || !username || !password) {
+      alert("Veuillez remplir tous les champs.");
+      return;
+    }
 
-    // Rediriger vers la page d'accueil (ou une autre page)
-    props.navigation.navigate('Accueil');
+    try {
+      const response = await api.post("/user/api-create-user.php", {
+        mail: email,
+        username: username,
+        motdepasse: password,
+      });
+
+      console.log(JSON.stringify(response.data)); 
+
+      if (response.data.status === 200) {
+        // Inscription réussie, mettre à jour les informations de l'utilisateur et rediriger
+        dispatch(updateUser({ username: username, email: email, jwt: response.data.jwt }));
+        props.navigation.navigate('Connexion');
+      } else {
+        // Gérer les erreurs d'inscription ici
+        alert("Une erreur s'est produite lors de l'inscription.");
+      }
+    } catch (error) {
+      // Gérer les erreurs d'API ici
+      console.log("Erreur de connexion à l'API :", error);
+      alert("Une erreur s'est produite lors de l'inscription.");
+    }
   };
 
   return (
@@ -28,7 +51,7 @@ const Inscription = (props) => {
           <Text style={style.titre}>Inscription</Text>
           <View style={style.input_group}>
             <Text style={style.text}>Votre Email:</Text>
-            <View style={style.input_container}>
+            <View style={[style.input_container, !email && style.required_input]}>
               <TextInput
                 secureTextEntry={false}
                 placeholder="Votre Email"
@@ -39,7 +62,7 @@ const Inscription = (props) => {
 
             <View>
               <Text style={style.text}>Votre Nom d'utilisateur:</Text>
-              <View style={style.input_container}>
+              <View style={[style.input_container, !username && style.required_input]}>
                 <TextInput
                   secureTextEntry={false}
                   placeholder="Username"
@@ -51,7 +74,7 @@ const Inscription = (props) => {
 
             <View>
               <Text style={style.text}>Votre Mot de Passe:</Text>
-              <View style={style.input_container}>
+              <View style={[style.input_container, !password && style.required_input]}>
                 <TextInput
                   secureTextEntry={false}
                   placeholder="Votre Mot de Passe"
@@ -67,6 +90,7 @@ const Inscription = (props) => {
           </TouchableOpacity>
         </View>
       </TouchableWithoutFeedback>
+
     </ScrollView>
   );
 };
@@ -116,5 +140,8 @@ const style = StyleSheet.create({
   },
   scrollContainer: {
     flex: 1,
+  },
+  required_input: {
+    borderColor: 'red',
   },
 });

@@ -1,37 +1,54 @@
-import React, { useState } from 'react';
-import {Text, TextInput, TouchableWithoutFeedback, TouchableOpacity, View, StyleSheet, ScrollView, Keyboard, Button } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {Text, TextInput, TouchableWithoutFeedback, TouchableOpacity, View, StyleSheet, ScrollView, Keyboard, Button, Alert } from 'react-native';
 import layouts from '../../constantes/layouts';
 import { useDispatch } from 'react-redux';
 import { updateUser } from '../userSlice';
-
-
+import api  from '../../constantes';
 
 const SignUp = (props) => {
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('kadi@yahoo.fr');
+  const [password, setPassword] = useState('djetou');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const dispatch = useDispatch();
 
-  const handleLogin = () => {
-    // Ici, vous pouvez effectuer la vérification des données
-    // Par exemple, en comparant les valeurs d'email et de mot de passe avec les données stockées
+  const handleLogin = async () => {
+    try {
+      if (email === '' || password === '') {
+        setErrorMessage('Veuillez remplir tous les champs pour vous connecter.');
+        Alert.alert('Alert', 'Veuillez remplir tous les champs pour vous connecter.');
+        return;
+      }
 
-    if (email === 'tima@gmail.com' && password) {
-      // Connexion réussie
-      console.log('Connexion réussie');
+      // Envoyer la demande de connexion à l'API
+      const response = await api.post("/user/api-connect-user.php", {
+        mailconnect: email,
+        mdpconnect: password,
+      });
 
-       // Dispatch de l'action pour mettre à jour les informations de l'utilisateur
-       dispatch(updateUser({ username: 'Tima', email }));
+      console.log(JSON.stringify(response.data)); 
 
-      
-      // Vous pouvez également naviguer vers une autre page si la connexion est réussie
-      props.navigation.navigate('Profile');
-    } else {
-      // Connexion échouée
-      console.log('Connexion échouée');
+      if (response.data.status == 200) {
+        // Connexion réussie, effectuez les actions nécessaires
+        setErrorMessage('');
+        console.log('Connexion réussie');
+  
+        // Dispatch de l'action pour mettre à jour les informations de l'utilisateur
+        dispatch(updateUser({ username: response.data.username, email: response.data.email, jwt : response.data.jwt }));
+  
+        // Vous pouvez également naviguer vers une autre page si la connexion est réussie
+        props.navigation.navigate('Profile');
+      } else {
+        // Connexion échouée
+        setErrorMessage('Les informations d\'identification sont incorrectes.');
+        console.log('Connexion échouée');
+      }
+    } catch (error) {
+      console.error("Une erreur s'est produite :", error);
     }
   };
+  
 
   return (
     <ScrollView
@@ -62,6 +79,8 @@ const SignUp = (props) => {
               </View>
             </View>
           </View>
+          {errorMessage !== '' && <Text style={style.errorMessage}>{errorMessage}</Text>}
+
 
           <TouchableOpacity  style={style.button} onPress={handleLogin}>
             <Text style={[style.text, style.button_text]}>Me connecter</Text>
@@ -122,4 +141,11 @@ const style = StyleSheet.create({
   scrollContainer: {
     flex: 1,
   },
+  errorMessage: {
+    color: 'red',
+    fontSize: 16,
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  
 });
