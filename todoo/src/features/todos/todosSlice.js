@@ -1,41 +1,40 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
-let nextTodoId=0;
-
-const todosSlice= createSlice({
-    name: 'todos',
-    initialState: [],
+const todosSlice = createSlice({
+  name: "todos",
+  initialState: {
     tasks: [],
-    deletedTasks: [], // Nouvelle liste pour les tâches supprimées
- 
-    reducers: {
-        addTodo(state, action){
-            state.push({id: nextTodoId++, text: action.payload, completed: false})
-        },
-        deleteTodo: (state, action) => {
-            const idToDelete = action.payload;
-            return state.filter((todo) => todo.id !== idToDelete);
-           
-          },
-          editTodo: (state, action) => {
-            const { id, text } = action.payload;
-            const todoToEdit = state.find((todo) => todo.id === id);
-            if (todoToEdit) {
-              todoToEdit.text = text;
-            }
-          },
-          updateTaskList: (state, action) => {
-            return action.payload; // Remplacez l'état par la liste des tâches mise à jour
-          },
-        toggleTodo(state, action){
-            const todo= state.find(todo=> todo.id=== action.payload)
-            if(todo){
-                todo.completed=!todo.completed
-            }
-        }
-    }
-})
+  },
 
-export const { addTodo, toggleTodo, deleteTodo, editTodo, updateTaskList}= todosSlice.actions
+  reducers: {
+    setTodos:(state, action) =>{
+      state.tasks = action.payload;
+      console.log(state.tasks);
+    },
+    addTodo : (state, action)=> {
+      const { id, text } = action.payload;
+      state.tasks.push({
+        id,
+        text,
+        completed: false,
+      });
+    },
+    deleteTodo: (state, action) => {
+      const idToDelete = action.payload.id; // Accédez à l'id depuis l'action payload
+      state.tasks = state.tasks.filter((todo) => todo.id !== idToDelete);
+    },
+    editTodo: (state, action) => {
+      const { id, text, status } = action.payload;
+      const todoToEdit = state.tasks.find((todo) => todo.id === id);
+      if (todoToEdit) {
+        todoToEdit.text = text;
+        todoToEdit.status = status;
+      }
+    },
+  },
+});
 
-export default todosSlice.reducer
+export const { addTodo, toggleTodo, deleteTodo, editTodo, setTodos } =
+  todosSlice.actions;
+
+export default todosSlice.reducer;

@@ -1,42 +1,78 @@
-import React, { useState, useEffect } from "react";
-import { View, StyleSheet, FlatList, Text, TouchableOpacity, TextInput, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, Text, TouchableOpacity, TextInput, ScrollView,} from "react-native";
 import { useSelector, useDispatch } from "react-redux";
-import { deleteTodo, editTodo, toggleTodo } from "./todosSlice";
-import axios from 'axios'; // Importez Axios
+import { deleteTodo, editTodo, setTodos, toggleTodo } from "./todosSlice";
 import { Addtodo } from "./AddTodo";
 import api from "../../../constantes";
 
 export function TodoList() {
-  const todos = useSelector((state) => state.todos);
+
+  const [todos, setTodos] = useState([]);
+  const [loading, setloading] = useState(false);
   const dispatch = useDispatch();
-  const jwtToken = useSelector(state => state.jwt);
+  const jwtToken = useSelector((state) => state.user.jwt);
+  
 
   const [editingTask, setEditingTask] = useState(null);
   const [editedTaskText, setEditedTaskText] = useState("");
-  const [newTodoText, setNewTodoText] = useState("");
+
+  const fetchTaskList = async () => {
+    setloading(true);
+    try {
+      const response = await api.get("/user/api-select-user-tasks.php", {
+        headers: {
+          Authorization: `Bearer ${jwtToken}`, // Utiliser le token JWT dans l'en-tête
+        },
+      });
+
+      if (response.data.status === 200) {
+        const todoslist = response.data.todos;
+        setTodos(todoslist);
+      } else {
+        console.log("Échec de la recuperation des todos de la tâche");
+      }
+    } catch (error) {
+      console.error(
+        "Une erreur s'est produite lors de la recuperation :",
+        error
+      );
+    }
+    setloading(false);
+  };
+
+  useEffect(() => {
+    if (jwtToken) {
+      fetchTaskList();
+    }
+  }, [jwtToken]);
 
   const handleDelete = async (id) => {
     try {
-      const Token = jwtToken;
-      const response = await api.post('/task/api-delete-task.php', {
-        id: id,
-      }, {
-        headers: {
-          'Authorization': `Bearer ${Token}`
+      const response = await api.post(
+        "/task/api-delete-task.php",
+        {
+          id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
         }
-      });
+      );
   
-      if (response.data.message === 'Tâche supprimée avec succès.') {
-        dispatch(deleteTodo({ id: id }));
+      console.log(response.data);
+  
+      if (response.data.status === 200) {
+        const todo = response.data.todo;
+
+        dispatch(deleteTodo({id : id}));// Supprimez la tâche du Redux store
       } else {
         console.log("Échec de la suppression de la tâche");
       }
     } catch (error) {
-      console.error('Une erreur s\'est produite lors de la suppression :', error);
+      console.error("Une erreur s'est produite lors de la suppression :", error);
     }
   };
-  
-  
   
 
   const handleToggle = (id) => {
@@ -49,96 +85,50 @@ export function TodoList() {
     setEditedTaskText(taskToEdit.task_name);
   };
 
-  
-
   const handleSaveEdit = async (id) => {
     try {
       const taskToEdit = todos.find((task) => task.id === id);
-      const Token = jwtToken;
-      const response = await api.post('/task/api-update-task.php', {
-
-        id: id,
-        task_name: editedTaskText,
-      },{
-        headers: {
-          'Authorization': `Basic ${Token}` 
+      const response = await api.post(
+        "/task/api-update-task.php",
+        {
+          id: id,
+          task_name: editedTaskText,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`, // Utiliser le token JWT dans l'en-tête
+          },
         }
-      });
-  
-      if (response.data.status === 200) {
-        dispatch(editTodo({ id: id, task_name: editedTaskText, status: taskToEdit.status }));
+      );
+      console.log(response.data);
+
+      if (response.data.status ==="200") {
+        const todo = response.data.todo; // Renommez la variable en newTodo
+        // dispatch
+        dispatch(editTodo({  id : todo.id,  text:todo.text }));
+        setText("");
+        fetchTaskList(); // Mettre à jour la liste des tâches
         setEditingTask(null);
       } else {
-        console.log('Échec de la modification de la tâche');
+        console.log("Échec de la modification de la tâche");
       }
     } catch (error) {
-      console.error('Une erreur s\'est produite lors de la modification :', error);
-    }
-  };
-  
-
-  const handleAddTodo = async () => {
-    try {
-      const Token = jwtToken;
-      const response = await api.post('/task/api-create-task.php', {
-        task_name: newTodoText,
-        status: 'en cours', // Vous pouvez définir le statut initial ici si nécessaire
-      }, {
-        headers: {
-          'Authorization': `Bearer ${Token}`
-        }
-      });
-  
-      if (response.data.status === 200) {
-
-        setNewTodoText(''); // Réinitialiser le champ de texte
-      } else {
-        console.log('Échec de l\'ajout de la tâche');
-      }
-    } catch (error) {
-      console.error('Une erreur s\'est produite lors de l\'ajout :', error);
-    }
-  };
-  
-
-  const fetchUserTasks = async () => {
-    try {
-      const Token = jwtToken;
-      const response = await api.post('/user/api-select-user-tasks.php', {
-        headers: {
-          'Authorization': `Bearer ${Token}`
-        }
-      });
-      return response.data.tasks; // Assurez-vous que la structure de réponse est correcte
-    } catch (error) {
-      console.error('Une erreur s\'est produite lors de la récupération des tâches de l\'utilisateur :', error);
-      return [];
+      console.log(
+        "Une erreur s'est produite lors de la modification :",
+        error
+      );
     }
   };
 
-  useEffect(() => {
-    async function fetchAndSetUserTasks() {
-      const tasks = await fetchUserTasks();
-      dispatch(updateTaskList(tasks)); // Mettre à jour le state avec les tâches
-    }
-    fetchAndSetUserTasks();
-  }, []); // Appel au chargement initial
-  
 
-  
-  
 
   return (
     <View style={styles.container}>
-      <Addtodo
-        onChangeText={(text) => setNewTodoText(text)}
-        onAddTodo={handleAddTodo}
-      />
+      <Addtodo />
       <ScrollView style={styles.scrollView}>
-        <FlatList
-          data={todos}
-          renderItem={({ item }) => (
-            <View style={styles.todoItem}>
+        {todos.length > 0 &&
+          todos.map((item) => (
+            <View key={item.id} style={styles.todoItem}>
               <TouchableOpacity
                 style={[
                   styles.toggleButton,
@@ -155,12 +145,12 @@ export function TodoList() {
                   style={styles.editInput}
                   value={editedTaskText}
                   onChangeText={setEditedTaskText}
-                  onBlur={handleSaveEdit}
+                  onBlur={() => handleSaveEdit(item.id)}
                   autoFocus
                   selectTextOnFocus
                 />
               ) : (
-                <Text style={styles.todoText}>{item.text}</Text>
+                <Text style={styles.todoText}>{item.task_name}</Text>
               )}
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
@@ -177,9 +167,12 @@ export function TodoList() {
                 </TouchableOpacity>
               </View>
             </View>
-          )}
-          keyExtractor={(item) => item.id.toString()}
-        />
+          ))}
+        {loading && (
+          <View>
+            <Text>loading.....</Text>
+          </View>
+        )}
       </ScrollView>
     </View>
   );

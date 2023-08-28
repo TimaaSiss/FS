@@ -4,12 +4,11 @@ import { useSelector } from "react-redux";
 
 export function Historique() {
   // Utilisez le Redux useSelector pour obtenir la liste complète de tâches
-  const todos = useSelector((state) => state.todos);
+  const tasks = useSelector((state) => state.todos.tasks); // Accédez à la propriété tasks
 
   // Filtrer les tâches terminées et en cours
-  const completedTodos = todos.filter((todo) => todo.completed);
-  const inProgressTodos = todos.filter((todo) => !todo.completed);
-
+  const completedTodos = tasks.filter((todo) => todo.completed);
+  const inProgressTodos = tasks.filter((todo) => !todo.completed);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Historique des Tâches en Cours</Text>
