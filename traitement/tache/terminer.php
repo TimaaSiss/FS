@@ -3,7 +3,7 @@
 
 require_once '../../config/init.php';
 
-$bdd = new PDO('mysql:host=localhost;dbname=to do', 'root', '');
+$bdd = new PDO('mysql:host=localhost;dbname=todo', 'root', '');
 $taskManager = new Task($bdd);
 
 if (isset($_GET['id'])) {
