@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Renvoyer une réponse JSON appropriée
                 if ($success) {
-                    echo json_encode(['message' => 'Utilisateur supprimé avec succès.']);
+                    echo json_encode(['message' => 'Utilisateur supprimé avec succès.', 'status'=>200]);
                 } else {
                     echo json_encode(['message' => 'Échec de la suppression de l\'utilisateur.']);
                 }
