@@ -1,13 +1,16 @@
 <?php
 
-class User {
+class User
+{
     private $db;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->db = $db;
     }
 
-    public function createUser($username, $email, $password) {
+    public function createUser($username, $email, $password)
+    {
         try {
             // Vérifier si l'utilisateur existe déjà dans la base de données
             $stmt = $this->db->prepare("SELECT * FROM user WHERE username = :username OR mail = :email");
@@ -37,7 +40,8 @@ class User {
     }
 
 
-    public function authenticateUser($email, $password) {
+    public function authenticateUser($email, $password)
+    {
         try {
             // Récupérer les informations de l'utilisateur depuis la base de données
             $stmt = $this->db->prepare("SELECT * FROM user WHERE mail = :email");
@@ -56,7 +60,8 @@ class User {
             die('Erreur lors de l\'authentification de l\'utilisateur : ' . $e->getMessage());
         }
     }
-     public function getUserbyId($user) {
+    public function getUserbyId($user)
+    {
         try {
             // Récupérer les informations de l'utilisateur depuis la base de données
             $stmt = $this->db->prepare("SELECT `id`,`username`,`mail`,`Roles`,`dateinscription` FROM user WHERE id = :username");
@@ -76,7 +81,8 @@ class User {
         }
     }
 
-     public function getUserbyEmail($email) {
+    public function getUserbyEmail($email)
+    {
         try {
             // Récupérer les informations de l'utilisateur depuis la base de données
             $stmt = $this->db->prepare("SELECT * FROM user WHERE mail = :email");
@@ -96,7 +102,8 @@ class User {
         }
     }
 
-    public function deleteUser($userId) {
+    public function deleteUser($userId)
+    {
         try {
             // Préparez la requête SQL pour supprimer l'utilisateur
             $sql = "DELETE FROM user WHERE id = :id";
@@ -113,7 +120,8 @@ class User {
             die('Erreur lors de la suppression de l\'utilisateur : ' . $e->getMessage());
         }
     }
-    public function getTaskStatus($id) {
+    public function getTaskStatus($id)
+    {
         try {
             $stmt = $this->db->prepare("SELECT COUNT(*) AS total_tasks FROM taches WHERE user_id = ?");
             $stmt->execute([$id]);
@@ -136,11 +144,12 @@ class User {
             die('Erreur lors de la récupération des statistiques des tâches : ' . $e->getMessage());
         }
     }
-    
 
 
 
-    public function updatePassword($userId, $hashedPassword) {
+
+    public function updatePassword($userId, $hashedPassword)
+    {
         try {
             // Mettre à jour le mot de passe de l'utilisateur dans la base de données
             $stmt = $this->db->prepare("UPDATE user SET motdepasse = :hashed_password WHERE id = :user_id");
@@ -154,7 +163,8 @@ class User {
         }
     }
 
-    public function getAllUsers() {
+    public function getAllUsers()
+    {
         try {
             $stmt = $this->db->prepare("SELECT * FROM user");
             $stmt->execute();
@@ -169,44 +179,46 @@ class User {
     {
         $query = "SELECT * FROM user WHERE id != :adminId";
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':adminId', $_SESSION['id'], PDO::PARAM_INT); 
+        $stmt->bindValue(':adminId', $_SESSION['id'], PDO::PARAM_INT);
         $stmt->execute();
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $users;
     }
 
-    public function updateUser($userId, $newUsername, $newEmail, $newPassword = "") {
-    try {
-        // Vérifier si un nouveau mot de passe a été fourni
-        if (!empty($newPassword)) {
-            // Hasher le nouveau mot de passe
-            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+    public function updateUser($userId, $newUsername, $newEmail, $newPassword = "")
+    {
+        try {
+            // Vérifier si un nouveau mot de passe a été fourni
+            if (!empty($newPassword)) {
+                // Hasher le nouveau mot de passe
+                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
-            // Mettre à jour le mot de passe de l'utilisateur dans la base de données
-            $stmt = $this->db->prepare("UPDATE user SET username = :username, mail = :email, motdepasse = :password WHERE id = :id");
-            $stmt->bindParam(':password', $hashedPassword);
-        } else {
-            // Si aucun nouveau mot de passe n'a été fourni, mettre à jour uniquement le nom d'utilisateur et l'adresse e-mail
-            $stmt = $this->db->prepare("UPDATE user SET username = :username, mail = :email WHERE id = :id");
+                // Mettre à jour le mot de passe de l'utilisateur dans la base de données
+                $stmt = $this->db->prepare("UPDATE user SET username = :username, mail = :email, motdepasse = :password WHERE id = :id");
+                $stmt->bindParam(':password', $hashedPassword);
+            } else {
+                // Si aucun nouveau mot de passe n'a été fourni, mettre à jour uniquement le nom d'utilisateur et l'adresse e-mail
+                $stmt = $this->db->prepare("UPDATE user SET username = :username, mail = :email WHERE id = :id");
+            }
+
+            // Liaison des paramètres
+            $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
+            $stmt->bindParam(':username', $newUsername);
+            $stmt->bindParam(':email', $newEmail);
+
+            // Exécution de la requête
+            $stmt->execute();
+
+            // Vérifiez si la mise à jour a réussi (rowCount renvoie le nombre de lignes affectées)
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            // Gérer les erreurs éventuelles lors de la mise à jour de l'utilisateur
+            die('Erreur lors de la mise à jour de l\'utilisateur : ' . $e->getMessage());
         }
-
-        // Liaison des paramètres
-        $stmt->bindParam(':id', $userId, PDO::PARAM_INT);
-        $stmt->bindParam(':username', $newUsername);
-        $stmt->bindParam(':email', $newEmail);
-
-        // Exécution de la requête
-        $stmt->execute();
-
-        // Vérifiez si la mise à jour a réussi (rowCount renvoie le nombre de lignes affectées)
-        return $stmt->rowCount() > 0;
-    } catch (PDOException $e) {
-        // Gérer les erreurs éventuelles lors de la mise à jour de l'utilisateur
-        die('Erreur lors de la mise à jour de l\'utilisateur : ' . $e->getMessage());
     }
-}
 
-     public function updateUserRole($userId, $role) {
+    public function updateUserRole($userId, $role)
+    {
         try {
             // Vérifier que le rôle est valide (admin ou user)
             if ($role !== 'admin' && $role !== 'user') {
@@ -220,15 +232,8 @@ class User {
             $stmt->execute();
 
             return 'true';
-        }  catch (Exception $e) {
+        } catch (Exception $e) {
             return ('Erreur : ' . $e->getMessage());
         }
     }
-
-   
-
-
-
 }
-
-?>
